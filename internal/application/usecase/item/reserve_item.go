@@ -7,11 +7,15 @@ import (
 	"wishlist-service/internal/errs"
 )
 
-type ReserveItemUseCase struct {
-	items ItemRepository
+type reserveItemRepository interface {
+	ReserveByPublicToken(ctx context.Context, publicToken string, itemID int64) error
 }
 
-func NewReserveItemUseCase(items ItemRepository) *ReserveItemUseCase {
+type ReserveItemUseCase struct {
+	items reserveItemRepository
+}
+
+func NewReserveItemUseCase(items reserveItemRepository) *ReserveItemUseCase {
 	return &ReserveItemUseCase{items: items}
 }
 

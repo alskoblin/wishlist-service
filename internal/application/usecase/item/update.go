@@ -9,12 +9,21 @@ import (
 	"wishlist-service/internal/errs"
 )
 
-type UpdateUseCase struct {
-	wishlists WishlistRepository
-	items     ItemRepository
+type updateItemWishlistRepository interface {
+	GetByIDAndOwner(ctx context.Context, id, ownerID int64) (*domain.Wishlist, error)
 }
 
-func NewUpdateUseCase(wishlists WishlistRepository, items ItemRepository) *UpdateUseCase {
+type updateItemRepository interface {
+	GetByIDAndWishlist(ctx context.Context, itemID, wishlistID int64) (*domain.Item, error)
+	Update(ctx context.Context, item *domain.Item) error
+}
+
+type UpdateUseCase struct {
+	wishlists updateItemWishlistRepository
+	items     updateItemRepository
+}
+
+func NewUpdateUseCase(wishlists updateItemWishlistRepository, items updateItemRepository) *UpdateUseCase {
 	return &UpdateUseCase{wishlists: wishlists, items: items}
 }
 

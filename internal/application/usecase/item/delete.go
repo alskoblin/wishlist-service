@@ -3,15 +3,24 @@ package item
 import (
 	"context"
 
+	"wishlist-service/internal/domain"
 	"wishlist-service/internal/errs"
 )
 
-type DeleteUseCase struct {
-	wishlists WishlistRepository
-	items     ItemRepository
+type deleteItemWishlistRepository interface {
+	GetByIDAndOwner(ctx context.Context, id, ownerID int64) (*domain.Wishlist, error)
 }
 
-func NewDeleteUseCase(wishlists WishlistRepository, items ItemRepository) *DeleteUseCase {
+type deleteItemRepository interface {
+	Delete(ctx context.Context, itemID, wishlistID int64) error
+}
+
+type DeleteUseCase struct {
+	wishlists deleteItemWishlistRepository
+	items     deleteItemRepository
+}
+
+func NewDeleteUseCase(wishlists deleteItemWishlistRepository, items deleteItemRepository) *DeleteUseCase {
 	return &DeleteUseCase{wishlists: wishlists, items: items}
 }
 

@@ -9,12 +9,20 @@ import (
 	"wishlist-service/internal/errs"
 )
 
-type CreateUseCase struct {
-	wishlists WishlistRepository
-	items     ItemRepository
+type createItemWishlistRepository interface {
+	GetByIDAndOwner(ctx context.Context, id, ownerID int64) (*domain.Wishlist, error)
 }
 
-func NewCreateUseCase(wishlists WishlistRepository, items ItemRepository) *CreateUseCase {
+type createItemRepository interface {
+	Create(ctx context.Context, item *domain.Item) error
+}
+
+type CreateUseCase struct {
+	wishlists createItemWishlistRepository
+	items     createItemRepository
+}
+
+func NewCreateUseCase(wishlists createItemWishlistRepository, items createItemRepository) *CreateUseCase {
 	return &CreateUseCase{wishlists: wishlists, items: items}
 }
 
