@@ -144,6 +144,28 @@ paths:
           $ref: '#/components/responses/NotFound'
 
   /api/v1/wishlists/{wishlistID}/items/:
+    get:
+      tags: [Items]
+      summary: List items in wishlist
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/WishlistID'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
     post:
       tags: [Items]
       summary: Create item in wishlist
