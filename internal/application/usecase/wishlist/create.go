@@ -27,7 +27,7 @@ func NewCreateUseCase(wishlists createWishlistRepository, tokens createTokenServ
 }
 
 func (uc *CreateUseCase) Execute(ctx context.Context, in dto.CreateWishlistInput) (*domain.Wishlist, error) {
-	if in.OwnerID == 0 || strings.TrimSpace(in.EventTitle) == "" {
+	if in.OwnerID == 0 || strings.TrimSpace(in.EventTitle) == "" || in.EventDate.IsZero() {
 		return nil, errs.ErrInvalidInput
 	}
 

@@ -23,7 +23,7 @@ func NewUpdateUseCase(wishlists updateWishlistRepository) *UpdateUseCase {
 }
 
 func (uc *UpdateUseCase) Execute(ctx context.Context, in dto.UpdateWishlistInput) (*domain.Wishlist, error) {
-	if in.WishlistID == 0 || in.OwnerID == 0 || strings.TrimSpace(in.EventTitle) == "" {
+	if in.WishlistID == 0 || in.OwnerID == 0 || strings.TrimSpace(in.EventTitle) == "" || in.EventDate.IsZero() {
 		return nil, errs.ErrInvalidInput
 	}
 

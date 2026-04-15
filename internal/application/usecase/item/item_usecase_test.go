@@ -23,6 +23,7 @@ func (m *itemWishlistRepoMock) GetByIDAndOwner(ctx context.Context, id, ownerID 
 
 type itemRepoMock struct {
 	createFn               func(ctx context.Context, item *domain.Item) error
+	listByWishlistFn       func(ctx context.Context, wishlistID int64) ([]domain.Item, error)
 	getByIDAndWishlistFn   func(ctx context.Context, itemID, wishlistID int64) (*domain.Item, error)
 	updateFn               func(ctx context.Context, item *domain.Item) error
 	deleteFn               func(ctx context.Context, itemID, wishlistID int64) error
@@ -34,6 +35,13 @@ func (m *itemRepoMock) Create(ctx context.Context, item *domain.Item) error {
 		return m.createFn(ctx, item)
 	}
 	return nil
+}
+
+func (m *itemRepoMock) ListByWishlist(ctx context.Context, wishlistID int64) ([]domain.Item, error) {
+	if m.listByWishlistFn != nil {
+		return m.listByWishlistFn(ctx, wishlistID)
+	}
+	return nil, nil
 }
 
 func (m *itemRepoMock) GetByIDAndWishlist(ctx context.Context, itemID, wishlistID int64) (*domain.Item, error) {
@@ -119,6 +127,39 @@ func TestCreateItemUseCaseExecuteSuccess(t *testing.T) {
 	}
 	if out.Title != "Book" {
 		t.Fatalf("unexpected output title: %s", out.Title)
+	}
+}
+
+func TestListItemUseCaseExecuteSuccess(t *testing.T) {
+	wishlists := &itemWishlistRepoMock{
+		getByIDAndOwnerFn: func(_ context.Context, id, ownerID int64) (*domain.Wishlist, error) {
+			return &domain.Wishlist{ID: id, OwnerID: ownerID}, nil
+		},
+	}
+	items := &itemRepoMock{
+		listByWishlistFn: func(_ context.Context, wishlistID int64) ([]domain.Item, error) {
+			if wishlistID != 5 {
+				t.Fatalf("unexpected wishlistID: %d", wishlistID)
+			}
+			return []domain.Item{{ID: 1, WishlistID: wishlistID, Title: "Book"}}, nil
+		},
+	}
+
+	uc := NewListUseCase(wishlists, items)
+	out, err := uc.Execute(context.Background(), 5, 3)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(out) != 1 || out[0].Title != "Book" {
+		t.Fatalf("unexpected output: %+v", out)
+	}
+}
+
+func TestListItemUseCaseExecuteInvalidInput(t *testing.T) {
+	uc := NewListUseCase(&itemWishlistRepoMock{}, &itemRepoMock{})
+	_, err := uc.Execute(context.Background(), 0, 3)
+	if !errors.Is(err, errs.ErrInvalidInput) {
+		t.Fatalf("expected ErrInvalidInput, got: %v", err)
 	}
 }
 

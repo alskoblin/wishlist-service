@@ -127,7 +127,21 @@ func TestCreateUseCaseExecuteInvalidInput(t *testing.T) {
 	}
 }
 
+func TestCreateUseCaseExecuteInvalidDate(t *testing.T) {
+	uc := NewCreateUseCase(&wishlistRepoMock{}, &publicTokenMock{})
+
+	_, err := uc.Execute(context.Background(), dto.CreateWishlistInput{
+		OwnerID:    1,
+		EventTitle: "Birthday",
+	})
+	if !errors.Is(err, errs.ErrInvalidInput) {
+		t.Fatalf("expected ErrInvalidInput, got: %v", err)
+	}
+}
+
 func TestUpdateUseCaseExecuteSuccess(t *testing.T) {
+	eventDate := time.Date(2026, 9, 12, 0, 0, 0, 0, time.UTC)
+
 	repo := &wishlistRepoMock{
 		getByIDAndOwnerFn: func(_ context.Context, id, ownerID int64) (*domain.Wishlist, error) {
 			return &domain.Wishlist{ID: id, OwnerID: ownerID, EventTitle: "Old"}, nil
@@ -145,12 +159,26 @@ func TestUpdateUseCaseExecuteSuccess(t *testing.T) {
 		WishlistID: 10,
 		OwnerID:    3,
 		EventTitle: "  New title  ",
+		EventDate:  eventDate,
 	})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if out.EventTitle != "New title" {
 		t.Fatalf("unexpected updated title: %s", out.EventTitle)
+	}
+}
+
+func TestUpdateUseCaseExecuteInvalidDate(t *testing.T) {
+	uc := NewUpdateUseCase(&wishlistRepoMock{})
+
+	_, err := uc.Execute(context.Background(), dto.UpdateWishlistInput{
+		WishlistID: 10,
+		OwnerID:    3,
+		EventTitle: "New title",
+	})
+	if !errors.Is(err, errs.ErrInvalidInput) {
+		t.Fatalf("expected ErrInvalidInput, got: %v", err)
 	}
 }
 
