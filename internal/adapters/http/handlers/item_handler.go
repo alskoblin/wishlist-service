@@ -12,6 +12,28 @@ import (
 	"wishlist-service/internal/errs"
 )
 
+func (h *Handler) ListItems(w http.ResponseWriter, r *http.Request) {
+	userID, ok := middleware.UserIDFromContext(r.Context())
+	if !ok {
+		presenter.WriteError(w, errs.ErrUnauthorized)
+		return
+	}
+
+	wishlistID, err := strconv.ParseInt(chi.URLParam(r, "wishlistID"), 10, 64)
+	if err != nil {
+		presenter.WriteError(w, errs.ErrInvalidInput)
+		return
+	}
+
+	items, err := h.listItemUC.Execute(r.Context(), wishlistID, userID)
+	if err != nil {
+		presenter.WriteError(w, err)
+		return
+	}
+
+	presenter.WriteJSON(w, http.StatusOK, items)
+}
+
 func (h *Handler) CreateItem(w http.ResponseWriter, r *http.Request) {
 	userID, ok := middleware.UserIDFromContext(r.Context())
 	if !ok {

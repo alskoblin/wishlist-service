@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"wishlist-service/internal/adapters/http/presenter"
 	"wishlist-service/internal/errs"
 )
 
@@ -60,5 +61,5 @@ func parseBearerToken(header string) (string, bool) {
 }
 
 func writeUnauthorized(w http.ResponseWriter) {
-	http.Error(w, errs.ErrUnauthorized.Error(), http.StatusUnauthorized)
+	presenter.WriteError(w, errs.ErrUnauthorized)
 }

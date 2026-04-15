@@ -38,6 +38,7 @@ func NewRouter(dep handlers.Dependencies, tokenService appmw.AccessTokenParser) 
 				r.Delete("/{wishlistID}", h.DeleteWishlist)
 
 				r.Route("/{wishlistID}/items", func(r chi.Router) {
+					r.Get("/", h.ListItems)
 					r.Post("/", h.CreateItem)
 					r.Put("/{itemID}", h.UpdateItem)
 					r.Delete("/{itemID}", h.DeleteItem)

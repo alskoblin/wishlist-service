@@ -60,6 +60,7 @@ type Handler struct {
 	deleteWishlistUC *wishlistuc.DeleteUseCase
 
 	createItemUC *itemuc.CreateUseCase
+	listItemUC   *itemuc.ListUseCase
 	updateItemUC *itemuc.UpdateUseCase
 	deleteItemUC *itemuc.DeleteUseCase
 
@@ -78,6 +79,7 @@ func NewHandler(dep Dependencies) *Handler {
 		deleteWishlistUC: wishlistuc.NewDeleteUseCase(dep.Wishlists),
 
 		createItemUC: itemuc.NewCreateUseCase(dep.Wishlists, dep.Items),
+		listItemUC:   itemuc.NewListUseCase(dep.Wishlists, dep.Items),
 		updateItemUC: itemuc.NewUpdateUseCase(dep.Wishlists, dep.Items),
 		deleteItemUC: itemuc.NewDeleteUseCase(dep.Wishlists, dep.Items),
 
