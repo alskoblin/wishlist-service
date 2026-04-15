@@ -1,0 +1,481 @@
+openapi: 3.0.3
+info:
+  title: Wishlist Service API
+  version: 1.0.0
+  description: REST API для вишлистов с публичным доступом по токену.
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: Auth
+  - name: Wishlists
+  - name: Items
+  - name: Public
+paths:
+  /api/v1/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthOutput'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthOutput'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/wishlists/:
+    get:
+      tags: [Wishlists]
+      summary: List own wishlists
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Wishlist'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Wishlists]
+      summary: Create wishlist
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWishlistInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wishlist'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/wishlists/{wishlistID}:
+    put:
+      tags: [Wishlists]
+      summary: Update wishlist
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/WishlistID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWishlistInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wishlist'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Wishlists]
+      summary: Delete wishlist
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/WishlistID'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/wishlists/{wishlistID}/items/:
+    post:
+      tags: [Items]
+      summary: Create item in wishlist
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/WishlistID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateItemInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/wishlists/{wishlistID}/items/{itemID}:
+    put:
+      tags: [Items]
+      summary: Update item
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/WishlistID'
+        - $ref: '#/components/parameters/ItemID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateItemInput'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Items]
+      summary: Delete item
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/WishlistID'
+        - $ref: '#/components/parameters/ItemID'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/public/{token}:
+    get:
+      tags: [Public]
+      summary: Get public wishlist by token
+      parameters:
+        - $ref: '#/components/parameters/PublicToken'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicWishlistResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/public/{token}/reserve/{itemID}:
+    post:
+      tags: [Public]
+      summary: Reserve item by public token
+      parameters:
+        - $ref: '#/components/parameters/PublicToken'
+        - $ref: '#/components/parameters/ItemID'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    WishlistID:
+      name: wishlistID
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    ItemID:
+      name: itemID
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    PublicToken:
+      name: token
+      in: path
+      required: true
+      schema:
+        type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    RegisterInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          example: user@example.com
+        password:
+          type: string
+          example: password123
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          example: user@example.com
+        password:
+          type: string
+          example: password123
+
+    AuthOutput:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    CreateWishlistInput:
+      type: object
+      required: [event_title, event_date]
+      properties:
+        event_title:
+          type: string
+          example: Birthday
+        description:
+          type: string
+          example: Gift ideas
+        event_date:
+          type: string
+          format: date-time
+          example: 2026-08-15T00:00:00Z
+
+    UpdateWishlistInput:
+      type: object
+      required: [event_title, event_date]
+      properties:
+        event_title:
+          type: string
+        description:
+          type: string
+        event_date:
+          type: string
+          format: date-time
+
+    Wishlist:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        owner_id:
+          type: integer
+          format: int64
+        event_title:
+          type: string
+        description:
+          type: string
+        event_date:
+          type: string
+          format: date-time
+        public_token:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateItemInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          example: Kindle
+        description:
+          type: string
+        product_url:
+          type: string
+          example: https://example.com/kindle
+        priority:
+          type: integer
+          example: 5
+
+    UpdateItemInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        product_url:
+          type: string
+        priority:
+          type: integer
+
+    Item:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        wishlist_id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        description:
+          type: string
+        product_url:
+          type: string
+        priority:
+          type: integer
+        reserved:
+          type: boolean
+        reserved_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    PublicWishlistResponse:
+      type: object
+      properties:
+        wishlist:
+          $ref: '#/components/schemas/Wishlist'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+
+    StatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: invalid input
